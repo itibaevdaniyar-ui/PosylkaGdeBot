@@ -42,6 +42,16 @@ async def track_request(message: Message):
     waiting_track.add(message.from_user.id)
     await message.answer("Введите трек-номер:")
 
+@dp.message(F.text == "🚚 Вызвать курьера")
+async def courier_request(message: Message):
+    await message.answer(
+        "Для вызова курьера отправьте одним сообщением:\n\n"
+        "Имя:\n"
+        "Телефон:\n"
+        "Адрес:\n"
+        "Вес:"
+    )
+
 @dp.message()
 async def process_track(message: Message):
     if message.from_user.id not in waiting_track:

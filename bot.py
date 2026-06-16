@@ -65,7 +65,7 @@ async def process_track(message: Message):
             await message.answer("События по отправлению не найдены.")
             return
 
-               events_text = f"📦 {track_number}\n\n"
+        events_text = f"📦 {track_number}\n\n"
 
         for day in data["events"]:
             for activity in day["activity"]:

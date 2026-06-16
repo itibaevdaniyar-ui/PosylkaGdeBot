@@ -24,7 +24,7 @@ STATUS_MAP = {
 menu = ReplyKeyboardMarkup(
     keyboard=[
         [KeyboardButton(text="📦 Отследить посылку")],
-        [KeyboardButton(text="💰 Рассчитать тариф")],
+        [KeyboardButton(text="🚚 Вызвать курьера")],
         [KeyboardButton(text="🏤 Найти отделение")]
     ],
     resize_keyboard=True

@@ -65,21 +65,21 @@ async def process_track(message: Message):
             await message.answer("События по отправлению не найдены.")
             return
 
-        last_day = data["events"][0]
-        last_event = last_day["activity"][0]
+       events_text = f"📦 {track_number}\n\n"
 
-        status_code = last_event["status"][0]
+for day in data["events"]:
+    for activity in day["activity"]:
+        status_code = activity["status"][0]
         status_text = STATUS_MAP.get(status_code, status_code)
 
-        text = (
-            f"📦 {track_number}\n\n"
-            f"Статус: {status_text}\n"
-            f"Город: {last_event['city']}\n"
-            f"Отделение: {last_event['name']}\n"
-            f"Время: {last_event['time']}"
+        events_text += (
+            f"📍 {status_text}\n"
+            f"🏙 {activity['city']}\n"
+            f"🏤 {activity['name']}\n"
+            f"🕒 {activity['time']}\n\n"
         )
 
-        await message.answer(text)
+await message.answer(events_text[:4000])
 
     except Exception as e:
         await message.answer(f"Ошибка: {e}")

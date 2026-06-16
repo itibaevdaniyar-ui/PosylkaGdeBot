@@ -9,7 +9,10 @@ TOKEN = os.getenv("BOT_TOKEN")
 
 dp = Dispatcher()
 
+ADMIN_ID = 8822799334
+
 waiting_track = set()
+waiting_courier = set()
 
 STATUS_MAP = {
     "ISSPAY": "Отправление оплачено",
@@ -44,6 +47,8 @@ async def track_request(message: Message):
 
 @dp.message(F.text == "🚚 Вызвать курьера")
 async def courier_request(message: Message):
+    waiting_courier.add(message.from_user.id)
+
     await message.answer(
         "Для вызова курьера отправьте одним сообщением:\n\n"
         "Имя:\n"
@@ -52,8 +57,34 @@ async def courier_request(message: Message):
         "Вес:"
     )
 
+@dp.message(F.text == "🏤 Найти отделение")
+async def office_request(message: Message):
+    await message.answer(
+        "Функция поиска отделений скоро появится."
+    )
+
 @dp.message()
-async def process_track(message: Message):
+async def process_message(message: Message):
+
+    if message.from_user.id in waiting_courier:
+        waiting_courier.remove(message.from_user.id)
+
+        text = (
+            "🚚 Новая заявка на курьера\n\n"
+            f"{message.text}\n\n"
+            f"Telegram ID: {message.from_user.id}"
+        )
+
+        await message.bot.send_message(
+            ADMIN_ID,
+            text
+        )
+
+        await message.answer(
+            "✅ Заявка принята.\nНаш оператор свяжется с вами."
+        )
+        return
+
     if message.from_user.id not in waiting_track:
         return
 
@@ -66,13 +97,17 @@ async def process_track(message: Message):
         response = requests.get(url, timeout=15)
 
         if response.status_code != 200:
-            await message.answer("Не удалось получить данные по отправлению.")
+            await message.answer(
+                "Не удалось получить данные по отправлению."
+            )
             return
 
         data = response.json()
 
         if not data.get("events"):
-            await message.answer("События по отправлению не найдены.")
+            await message.answer(
+                "События по отправлению не найдены."
+            )
             return
 
         events_text = f"📦 {track_number}\n\n"
@@ -80,7 +115,10 @@ async def process_track(message: Message):
         for day in data["events"]:
             for activity in day["activity"]:
                 status_code = activity["status"][0]
-                status_text = STATUS_MAP.get(status_code, status_code)
+                status_text = STATUS_MAP.get(
+                    status_code,
+                    status_code
+                )
 
                 events_text += (
                     f"📍 {status_text}\n"

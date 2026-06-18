@@ -13,6 +13,7 @@ ADMIN_ID = 8822799334
 
 waiting_track = set()
 waiting_courier = set()
+waiting_operator = set()
 
 STATUS_MAP = {
     "ISSPAY": "Отправление оплачено",
@@ -29,6 +30,7 @@ menu = ReplyKeyboardMarkup(
         [KeyboardButton(text="📦 Отследить посылку")],
         [KeyboardButton(text="🚚 Вызвать курьера")],
         [KeyboardButton(text="🏤 Найти отделение")],
+        [KeyboardButton(text="📞 Связаться с оператором")]
     ],
     resize_keyboard=True
 )
@@ -51,10 +53,10 @@ async def courier_request(message: Message):
 
     await message.answer(
         "Для вызова курьера отправьте одним сообщением:\n\n"
-        "Имя: \n"
-        "Телефон: \n"
-        "Адрес: \n"
-        "Вес: "
+        "Имя:\n"
+        "Телефон:\n"
+        "Адрес:\n"
+        "Вес:"
     )
 
 @dp.message(F.text == "🏤 Найти отделение")
@@ -63,15 +65,40 @@ async def office_request(message: Message):
         "Функция поиска отделений скоро появится."
     )
 
+@dp.message(F.text == "📞 Связаться с оператором")
+async def operator_request(message: Message):
+    waiting_operator.add(message.from_user.id)
+
+    await message.answer(
+        "Напишите ваш вопрос оператору одним сообщением."
+    )
+
 @dp.message()
 async def process_message(message: Message):
+
+    if message.from_user.id in waiting_operator:
+        waiting_operator.remove(message.from_user.id)
+
+        await message.bot.send_message(
+            ADMIN_ID,
+            f"📞 Обращение к оператору\n\n"
+            f"{message.text}\n\n"
+            f"ID клиента: {message.from_user.id}"
+        )
+
+        await message.answer(
+            "✅ Ваше обращение отправлено оператору."
+        )
+        return
 
     if message.from_user.id in waiting_courier:
         waiting_courier.remove(message.from_user.id)
 
         await message.bot.send_message(
             ADMIN_ID,
-            f"🚚 Новая заявка\n\n{message.text}"
+            f"🚚 Новая заявка на курьера\n\n"
+            f"{message.text}\n\n"
+            f"ID клиента: {message.from_user.id}"
         )
 
         await message.answer(

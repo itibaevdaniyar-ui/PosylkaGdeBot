@@ -28,7 +28,7 @@ menu = ReplyKeyboardMarkup(
     keyboard=[
         [KeyboardButton(text="📦 Отследить посылку")],
         [KeyboardButton(text="🚚 Вызвать курьера")],
-        [KeyboardButton(text="🏤 Найти отделение")]
+        [KeyboardButton(text="🏤 Найти отделение")],
     ],
     resize_keyboard=True
 )
@@ -51,10 +51,10 @@ async def courier_request(message: Message):
 
     await message.answer(
         "Для вызова курьера отправьте одним сообщением:\n\n"
-        "Имя:\n"
-        "Телефон:\n"
-        "Адрес:\n"
-        "Вес:"
+        "Имя: \n"
+        "Телефон: \n"
+        "Адрес: \n"
+        "Вес: "
     )
 
 @dp.message(F.text == "🏤 Найти отделение")
@@ -69,15 +69,9 @@ async def process_message(message: Message):
     if message.from_user.id in waiting_courier:
         waiting_courier.remove(message.from_user.id)
 
-        text = (
-            "🚚 Новая заявка на курьера\n\n"
-            f"{message.text}\n\n"
-            f"Telegram ID: {message.from_user.id}"
-        )
-
         await message.bot.send_message(
             ADMIN_ID,
-            text
+            f"🚚 Новая заявка\n\n{message.text}"
         )
 
         await message.answer(
